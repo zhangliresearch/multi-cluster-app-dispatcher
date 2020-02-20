@@ -141,6 +141,9 @@ type AppWrapperStatus struct {
 	State AppWrapperState `json:"state,omitempty"`
 
 	Message string `json:"message,omitempty"`
+
+	//System defined Priority
+	SystemPriority      int   `json:"systempriority,omitempty"`
 }
 
 type AppWrapperState string

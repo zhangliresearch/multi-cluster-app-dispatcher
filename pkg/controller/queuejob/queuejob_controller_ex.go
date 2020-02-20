@@ -550,7 +550,7 @@ func (qjm *XController) ScheduleNext() {
 	if err != nil {
 		glog.V(4).Infof("Cannot pop QueueJob from the queue!")
 	}
-	glog.V(10).Infof("[TTime] %s, %s: ScheduleNextStart", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+	glog.V(10).Infof("[TTime] %s, %s: ScheduleNextStart Priority=%d CreationTimestamp=%s", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time), qj.Spec.Priority, qj.CreationTimestamp.Time)
 	// glog.Infof("I have queuejob %+v", qj)
 	if(qjm.isDispatcher) {
 		glog.V(2).Infof("[Controller: Dispatcher Mode] Dispatch Next QueueJob: %s\n", qj.Name)
@@ -904,6 +904,7 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 			}
 
 			qj.Status.State = arbv1.AppWrapperStateEnqueued
+			qj.Status.SystemPriority = qj.Spec.Priority
 			glog.V(10).Infof("[TTime] %s, %s: WorkerBeforeEtcd", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
 			_, err = cc.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj)
 			if err != nil {
