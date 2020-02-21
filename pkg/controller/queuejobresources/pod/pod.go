@@ -236,25 +236,10 @@ func (qjrPod *QueueJobResPod) UpdateQueueJobStatus(queuejob *arbv1.AppWrapper) e
     glog.Infof("There are %d pods of QueueJob %s:  pending %d, running %d, succeeded %d, failed %d",
                 len(pods), queuejob.Name,  pending, running, succeeded, failed)
 
-//	old_flag := queuejob.Status.CanRun
-//	old_flag_2 := queuejob.Status.IsDispatched
-//	old_state := queuejob.Status.State
-//	queuejob.Status = arbv1.AppWrapperStatus{
-//                Pending:      pending,
-//                Running:      running,
-//                Succeeded:    succeeded,
-//                Failed:       failed,
-//                MinAvailable: int32(queuejob.Spec.SchedSpec.MinAvailable),
-//  }
-//	queuejob.Status.CanRun = old_flag
-//	queuejob.Status.State = old_state
-//	queuejob.Status.IsDispatched= old_flag_2
-
 	queuejob.Status.Pending      = pending
 	queuejob.Status.Running      = running
 	queuejob.Status.Succeeded    = succeeded
 	queuejob.Status.Failed       = failed
-	queuejob.Status.MinAvailable = int32(queuejob.Spec.SchedSpec.MinAvailable)
 
 	return nil
 }
