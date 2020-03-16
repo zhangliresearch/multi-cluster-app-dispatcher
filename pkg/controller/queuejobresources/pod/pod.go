@@ -284,6 +284,7 @@ func (qjrPod *QueueJobResPod) manageQueueJob(qj *arbv1.AppWrapper, pods []*v1.Po
 	}
 
 	// Create pod if necessary
+	glog.V(3).Infof("diff=%d", int32(replicas) - pending - running - succeeded)
 	if diff := int32(replicas) - pending - running - succeeded; diff > 0 {
 		glog.V(3).Infof("Try to create %v Pods for QueueJob %v/%v", diff, qj.Namespace, qj.Name)
 		var errs []error
@@ -293,6 +294,7 @@ func (qjrPod *QueueJobResPod) manageQueueJob(qj *arbv1.AppWrapper, pods []*v1.Po
 			go func(ix int32) {
 				defer wait.Done()
 				newPod := qjrPod.createQueueJobPod(qj, ix, ar)
+				glog.V(10).Infof("qj=%s\n  newPod=%v", qj, newPod)
 				_, err := qjrPod.clients.Core().Pods(newPod.Namespace).Create(newPod)
 				if err != nil {
 					// Failed to create Pod, wait a moment and then create it again
@@ -306,23 +308,19 @@ func (qjrPod *QueueJobResPod) manageQueueJob(qj *arbv1.AppWrapper, pods []*v1.Po
 		}
 		wait.Wait()
 
+		qj.Status.QueueJobState = arbv1.QueueJobStateDispatched
 		if len(errs) != 0 {
+			qj.Status.QueueJobState = arbv1.QueueJobStateFailed
 			return fmt.Errorf("failed to create %d pods of %d", len(errs), diff)
 		}
+	} else {
+		qj.Status.QueueJobState = arbv1.QueueJobStateRunning
 	}
 
-	old_flag := qj.Status.CanRun
-	old_flag_2 := qj.Status.IsDispatched
-	qj.Status = arbv1.AppWrapperStatus{
-		Pending:      pending,
-		Running:      running,
-		Succeeded:    succeeded,
-		Failed:       failed,
-		MinAvailable: int32(qj.Spec.SchedSpec.MinAvailable),
-	}
-
-	qj.Status.CanRun = old_flag
-	qj.Status.IsDispatched=old_flag_2
+	qj.Status.Pending   = pending
+	qj.Status.Running   = running
+	qj.Status.Succeeded = succeeded
+	qj.Status.Failed    = failed
 	return err
 }
 
@@ -391,6 +389,8 @@ func (qjrPod *QueueJobResPod) manageQueueJobPods(activePods []*v1.Pod, succeeded
 					defer wait.Done()
 					newPod := qjrPod.createQueueJobPod(qj, ix, ar)
 					//newPod := buildPod(fmt.Sprintf("%s-%d-%s", qj.Name, ix, generateUUID()), qj.Namespace, qj.Spec.Template, []metav1.OwnerReference{*metav1.NewControllerRef(qj, controllerKind)}, ix)
+					glog.V(10).Infof("qj=%v\n  newPod=%v", qj, newPod)
+
 					for {
 						_, err := qjrPod.clients.Core().Pods(newPod.Namespace).Create(newPod)
 						if err == nil {

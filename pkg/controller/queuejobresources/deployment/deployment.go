@@ -220,6 +220,7 @@ func (qjrDeployment *QueueJobResDeployment) createDeploymentWithControllerRef(na
 		deployment.OwnerReferences = append(deployment.OwnerReferences, *controllerRef)
 	}
 
+	glog.V(10).Infof("[LiZ] Before DeploymentCreate qjrDeployment=%s", qjrDeployment)
 	if _, err := qjrDeployment.clients.AppsV1beta1().Deployments(namespace).Create(deployment); err != nil {
 		return err
 	}
@@ -274,10 +275,10 @@ func (qjrDeployment *QueueJobResDeployment) SyncQueueJob(queuejob *arbv1.AppWrap
 			deploymentInQjr.Labels[k] = v
 		}
 		deploymentInQjr.Labels[queueJobName] = queuejob.Name
-    if deploymentInQjr.Spec.Template.Labels == nil {
+		if deploymentInQjr.Spec.Template.Labels == nil {
             deploymentInQjr.Labels = map[string]string{}
-    }
-    deploymentInQjr.Spec.Template.Labels[queueJobName] = queuejob.Name
+    	}
+    	deploymentInQjr.Spec.Template.Labels[queueJobName] = queuejob.Name
 
 		wait := sync.WaitGroup{}
 		wait.Add(int(diff))
@@ -291,11 +292,15 @@ func (qjrDeployment *QueueJobResDeployment) SyncQueueJob(queuejob *arbv1.AppWrap
 					return
 				}
 				if err != nil {
+					queuejob.Status.QueueJobState = arbv1.QueueJobStateFailed
 					defer utilruntime.HandleError(err)
 				}
 			}()
 		}
 		wait.Wait()
+		queuejob.Status.QueueJobState = arbv1.QueueJobStateDispatched
+	} else {
+		queuejob.Status.QueueJobState = arbv1.QueueJobStateRunning
 	}
 
 	return nil

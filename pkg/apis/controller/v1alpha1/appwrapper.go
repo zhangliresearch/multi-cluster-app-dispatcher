@@ -35,6 +35,9 @@ type AppWrapper struct {
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	Spec              AppWrapperSpec   `json:"spec"`
 	Status            AppWrapperStatus `json:"status,omitempty"`
+	FilterIgnore      bool  `json:"filterignore,omitempty"`
+	Sender            string  `json:"sender,omitempty"`
+	Local             bool  `json:"local,omitempty"`
 }
 
 // AppWrapperList is a collection of AppWrappers.
@@ -47,7 +50,8 @@ type AppWrapperList struct {
 
 // AppWrapperSpec describes how the App Wrapper will look like.
 type AppWrapperSpec struct {
-	Priority      int                    `json:"priority,omitempty"`
+	Priority      float64                    `json:"priority,omitempty"`
+	PrioritySlope float64                    `json:"priorityslope,omitempty"`
 	Service       AppWrapperService      `json:"service"`
 	AggrResources AppWrapperResourceList `json:"resources"`
 
@@ -77,6 +81,9 @@ type AppWrapperResource struct {
 
 	// The priority of this resource
 	Priority float64 `json:"priority"`
+
+	// The increasing rate of priority value for this resource
+	PrioritySlope float64 `json:"priorityslope"`
 
 	//The type of the resource (is the resource a Pod, a ReplicaSet, a ... ?)
 	Type ResourceType `json:"type"`
@@ -130,7 +137,7 @@ type AppWrapperStatus struct {
 	// The minimal available resources to run for this AppWrapper (is this different from the MinAvailable from JobStatus)
 	// +optional
 	MinAvailable int32 `json:"template,omitempty" protobuf:"bytes,4,opt,name=template"`
-	
+
 	//Can run?
 	CanRun bool `json:"canrun,omitempty" protobuf:"bytes,1,opt,name=canrun"`
 
@@ -143,7 +150,13 @@ type AppWrapperStatus struct {
 	Message string `json:"message,omitempty"`
 
 	//System defined Priority
-	SystemPriority      int   `json:"systempriority,omitempty"`
+	SystemPriority float64  `json:"systempriority,omitempty"`
+
+	//State of QueueJob - Init, Queueing, HeadOfLine, Rejoining, ...
+	QueueJobState QueueJobState `json:"queuejobstate,omitempty"`
+
+	//Timestamp when controller first sees QueueJob (by Informer)
+//	ControllerFirstTimestamp time.Time `json:"controllerfirsttimestamp,omitempty"`
 }
 
 type AppWrapperState string
@@ -154,4 +167,17 @@ const (
 	AppWrapperStateActive   AppWrapperState = "Running"
 	AppWrapperStateDeleted  AppWrapperState = "Deleted"
 	AppWrapperStateFailed   AppWrapperState = "Failed"
+)
+
+type QueueJobState string
+
+const (
+	QueueJobStateInit       QueueJobState = "Init"
+	QueueJobStateQueueing   QueueJobState = "Queueing"
+	QueueJobStateHeadOfLine QueueJobState = "HeadOfLine"
+	QueueJobStateRejoining  QueueJobState = "Rejoining"
+	QueueJobStateDispatched QueueJobState = "Dispatched"
+	QueueJobStateRunning    QueueJobState = "Running"
+	QueueJobStateDeleted    QueueJobState = "Deleted"
+	QueueJobStateFailed     QueueJobState = "Failed"
 )

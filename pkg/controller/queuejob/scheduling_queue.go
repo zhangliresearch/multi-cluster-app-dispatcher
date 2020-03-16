@@ -28,12 +28,11 @@ package queuejob
 
 import (
 	"fmt"
-	"sync"
-
-	"k8s.io/client-go/tools/cache"
 	qjobv1 "github.com/IBM/multi-cluster-app-dispatcher/pkg/apis/controller/v1alpha1"
 	"github.com/golang/glog"
+	"k8s.io/client-go/tools/cache"
 	"reflect"
+	"sync"
 )
 
 // SchedulingQueue is an interface for a queue to store pods waiting to be scheduled.
@@ -49,6 +48,9 @@ type SchedulingQueue interface {
 	MoveToActiveQueueIfExists(QJ *qjobv1.AppWrapper) error
 	MoveAllToActiveQueue()
 	IfExist(QJ *qjobv1.AppWrapper) bool
+	IfExistActiveQ(QJ *qjobv1.AppWrapper) bool
+	IfExistUnschedulableQ(QJ *qjobv1.AppWrapper) bool
+	Length() int
 }
 
 
@@ -96,11 +98,18 @@ var _ = SchedulingQueue(&PriorityQueue{})
 
 func NewPriorityQueue() *PriorityQueue {
 	pq := &PriorityQueue{
-		activeQ:        newHeap(cache.MetaNamespaceKeyFunc, HigherPriorityQJ),
+		activeQ:        newHeap(cache.MetaNamespaceKeyFunc, HigherSystemPriorityQJ),
 		unschedulableQ: newUnschedulableQJMap(),
 	}
 	pq.cond.L = &pq.lock
 	return pq
+}
+
+func (p *PriorityQueue) Length() int {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	pqlength := p.activeQ.data.Len()
+	return pqlength
 }
 
 func (p *PriorityQueue) IfExist(qj *qjobv1.AppWrapper) bool {
@@ -113,6 +122,19 @@ func (p *PriorityQueue) IfExist(qj *qjobv1.AppWrapper) bool {
 	return false
 }
 
+func (p *PriorityQueue) IfExistActiveQ(qj *qjobv1.AppWrapper) bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	_, exists, _ := p.activeQ.Get(qj)
+	return exists
+}
+
+func (p *PriorityQueue) IfExistUnschedulableQ(qj *qjobv1.AppWrapper) bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	exists := p.unschedulableQ.Get(qj)
+	return (exists != nil)
+}
 
 // Move QJ from unschedulableQ to activeQ if exists
 func (p *PriorityQueue) MoveToActiveQueueIfExists(qj *qjobv1.AppWrapper) error {
