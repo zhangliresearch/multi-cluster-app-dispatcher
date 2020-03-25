@@ -17,6 +17,7 @@ limitations under the License.
 package app
 
 import (
+	"github.com/golang/glog"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -41,10 +42,13 @@ func Run(opt *options.ServerOption) error {
 
 	neverStop := make(chan struct{})
 
-	queuejobctrl := queuejob.NewQueueJobController(config)
-	queuejobctrl.Run(neverStop)
+	config.QPS   = 100.0
+	config.Burst = 200.0
+//	queuejobctrl := queuejob.NewQueueJobController(config)
+//	queuejobctrl.Run(neverStop)
 
-	jobctrl := queuejob.NewJobController(config, opt.SchedulerName, opt.Dispatcher, opt.AgentConfigs)
+	glog.V(10).Infof("[ServerRun] &opt=%p opt=%+v &config=%p config=%+v", opt, opt, config, config)
+	jobctrl := queuejob.NewJobController(config, opt.SchedulerName, opt.Dispatcher, opt.AgentConfigs, opt)
 	if jobctrl ==nil {
 		return nil
 	}

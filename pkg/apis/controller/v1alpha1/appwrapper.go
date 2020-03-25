@@ -156,7 +156,7 @@ type AppWrapperStatus struct {
 	QueueJobState QueueJobState `json:"queuejobstate,omitempty"`
 
 	//Timestamp when controller first sees QueueJob (by Informer)
-//	ControllerFirstTimestamp time.Time `json:"controllerfirsttimestamp,omitempty"`
+	ControllerFirstTimestamp metav1.Time `json:"controllerfirsttimestamp,omitempty"`
 }
 
 type AppWrapperState string
