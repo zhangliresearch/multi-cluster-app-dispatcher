@@ -48,7 +48,7 @@ func Run(opt *options.ServerOption) error {
 //	queuejobctrl.Run(neverStop)
 
 	glog.V(10).Infof("[ServerRun] &opt=%p opt=%+v &config=%p config=%+v", opt, opt, config, config)
-	jobctrl := queuejob.NewJobController(config, opt.SchedulerName, opt.Dispatcher, opt.AgentConfigs, opt)
+	jobctrl := queuejob.NewJobController(config, opt)
 	if jobctrl ==nil {
 		return nil
 	}
