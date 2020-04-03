@@ -323,7 +323,7 @@ spec:
         command: ["mcad-controller"]
 #        args: ["--v", "4", "--logtostderr"]
 #        args: ["--v", "10", "--logtostderr", "--secure-port=6443"]
-        args: ["--v", "10", "--logtostderr", "--sendupdate=true", "--demo=true", "--dynamicpriority=true", "--preemption=false"]
+        args: ["--v", "10", "--logtostderr", "--sendupdate=true", "--demo=true", "--dynamicpriority=true", "--preemption=false", "--headoflineholdingtime=25", "--backofftime=20"]
         ports:
         - containerPort: 6443
           name: https

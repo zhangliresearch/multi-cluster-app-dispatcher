@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: helloli-1-test
+  labels:
+    app: helloli-1-test
+spec:
+  selector:
+    matchLabels:
+      app: helloli-1-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: helloli-1-test
+    spec:
+      containers:
+       - name: helloli-1-test
+         image: gcr.io/hello-minikube-zero-install/hello-node
+         resources:
+           limits:
+             cpu: 125m
+             memory: 1024Mi
+           requests:
+             cpu: 125m
+             memory: 1024Mi
+

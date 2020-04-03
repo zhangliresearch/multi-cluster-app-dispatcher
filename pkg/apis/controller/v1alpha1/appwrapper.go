@@ -35,9 +35,9 @@ type AppWrapper struct {
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	Spec              AppWrapperSpec   `json:"spec"`
 	Status            AppWrapperStatus `json:"status,omitempty"`
-	FilterIgnore      bool  `json:"filterignore,omitempty"`
-	Sender            string  `json:"sender,omitempty"`
-	Local             bool  `json:"local,omitempty"`
+//	FilterIgnore      bool  `json:"filterignore,omitempty"`
+//	Sender            string  `json:"sender,omitempty"`
+//	Local             bool  `json:"local,omitempty"`
 }
 
 // AppWrapperList is a collection of AppWrappers.
@@ -150,13 +150,22 @@ type AppWrapperStatus struct {
 	Message string `json:"message,omitempty"`
 
 	//System defined Priority
-	SystemPriority float64  `json:"systempriority,omitempty"`
+	SystemPriority float64 `json:"systempriority,omitempty"`
 
 	//State of QueueJob - Init, Queueing, HeadOfLine, Rejoining, ...
 	QueueJobState QueueJobState `json:"queuejobstate,omitempty"`
 
 	//Timestamp when controller first sees QueueJob (by Informer)
 	ControllerFirstTimestamp metav1.Time `json:"controllerfirsttimestamp,omitempty"`
+
+	// Tell Informer to ignore this update message (do not generate a controller event)
+	FilterIgnore bool `json:"filterignore,omitempty"`
+
+	// Indicate sender of this message (extremely useful for debugging)
+	Sender string `json:"sender,omitempty"`
+
+	// Indicate if message is a duplicate (for Informer to recognize duplicate messages)
+	Local bool `json:"local,omitempty"`
 }
 
 type AppWrapperState string

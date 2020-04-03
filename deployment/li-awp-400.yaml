@@ -1,0 +1,40 @@
+apiVersion: arbitrator.incubator.k8s.io/v1alpha1
+kind: AppWrapper
+metadata:
+  name: helloli-awp-400-60
+spec:
+  schedSpec:
+    minAvailable: 1
+  priority: 400
+  priorityslope: 60
+  resources:
+    Items:
+    - replicas: 1
+      type: Pod
+      template:
+        metadata: 
+          name: helloli-awp-400-60
+          labels:
+            name: helloli-awp-400-60
+        template:
+          metadata:
+            name: helloli-awp-400-60
+            labels:
+              name: helloli-awp-400-60
+          spec:
+            containers:
+            - name: helloli-awp-400-60
+              image: nginx
+              command: ["sleep", "60"]
+              ports:
+              - containerPort: 80
+              resources:
+                limits:
+                  cpu: 125m
+                  memory: 1024Mi
+                requests:
+                  cpu: 125m
+                  memory: 1024Mi
+            restartPolicy: Never
+
+

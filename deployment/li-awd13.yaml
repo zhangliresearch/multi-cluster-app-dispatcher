@@ -1,0 +1,40 @@
+apiVersion: arbitrator.incubator.k8s.io/v1alpha1
+kind: AppWrapper
+metadata:
+  name: helloli-awd-300-70
+spec:
+  schedSpec:
+    minAvailable: 2
+  priority: 300
+  priorityslope: 70
+  resources:
+    Items:
+    - replicas: 1
+      type: Deployment
+      template:
+        apiVersion: apps/v1beta1
+        kind: Deployment
+        metadata:
+          name: helloli-awd-300-70
+          labels:
+            app: helloli-awd-300-70
+        spec:
+          selector:
+            matchLabels:
+              app: helloli-awd-300-70
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: helloli-awd-300-70
+            spec:
+              containers:
+               - name: helloli-awd-300-70
+                 image: gcr.io/hello-minikube-zero-install/hello-node
+                 resources:
+                   limits:
+                     cpu: 125m
+                     memory: 1024000Mi
+                   requests:
+                     cpu: 125m
+                     memory: 1024000Mi
