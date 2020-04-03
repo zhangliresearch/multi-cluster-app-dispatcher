@@ -556,14 +556,11 @@ func (qjm *XController) ScheduleNext() {
 	// amount of resources asked by the job
 	glog.V(10).Infof("[ScheduleNext] isDispatcher=%t &serverOption=%p serverOption=%+v", qjm.isDispatcher, qjm.serverOption, qjm.serverOption)
 	SendUpdate := qjm.serverOption.SendUpdate
-	Preemption := qjm.serverOption.Preemption
-	DynamicPriority := qjm.serverOption.DynamicPriority
-	Demo := qjm.serverOption.Demo
 
 	glog.V(10).Infof("[ScheduleNext] BeforePop qjqLength=%d",qjm.qjqueue.Length())
 	qjtemp, _ := qjm.qjqueue.Pop()
 	glog.V(10).Infof("[ScheduleNext] qjqueuePoped qj=%s oldSystemPriority=%.1f Remaining qjqLength=%d", qjtemp.Name, qjtemp.Status.SystemPriority, qjm.qjqueue.Length())
-	if Demo {
+	if qjm.serverOption.Demo {
 		time.Sleep(time.Millisecond * 100)
 	}
 	//  Create newHeap to temporarily store qjqueue jobs for updating SystemPriority
@@ -648,8 +645,10 @@ func (qjm *XController) ScheduleNext() {
 		// Try to dispatch for at most HeadOfLineHoldingTime
 		for (!dispatched && time.Now().Before(HOLStartTime.Add(time.Duration(qjm.serverOption.HeadOfLineHoldingTime)*time.Second))) {
 			priorityindex := qj.Status.SystemPriority
-			// Preemption not allowed under DynamicPriority
-			if (DynamicPriority || !Preemption) { priorityindex = -math.MaxFloat64 }
+			// Support for Non-Preemption
+			if !qjm.serverOption.Preemption     { priorityindex = -math.MaxFloat64 }
+			// Disable Preemption under DynamicPriority.  Comment out if allow DynamicPriority and Preemption at the same time.
+			if qjm.serverOption.DynamicPriority { priorityindex = -math.MaxFloat64 }
 			resources := qjm.getAggregatedAvailableResourcesPriority(priorityindex, qj.Name)
 	//		resources := qjm.getAggregatedAvailableResourcesPriority(qj.Status.SystemPriority, qj.Name)
 			glog.V(2).Infof("[ScheduleNext] XQJ %s with resources %v to be scheduled on aggregated idle resources %v", qj.Name, aggqj, resources)
@@ -681,7 +680,7 @@ func (qjm *XController) ScheduleNext() {
 				qjm.qjqueue.Delete(qj)
 				dispatched = true
 				glog.V(10).Infof("[ScheduleNext] after qjqueue delete %s activeQ=%t, Unsched=%t Status=%+v", qj.Name, qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
-				if Demo {  // Delay 9.9 sec for demo only
+				if qjm.serverOption.Demo {  // Delay 9.9 sec for Demo only
 					time.Sleep(time.Millisecond * 9900)
 				}
 			} else {  // Not enough free resources to dispatch HOL
