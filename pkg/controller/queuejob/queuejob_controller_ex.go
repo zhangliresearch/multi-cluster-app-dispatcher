@@ -73,13 +73,6 @@ const (
 
 	// ControllerUIDLabel label string for queuejob controller uid
 	ControllerUIDLabel string = "controller-uid"
-
-//	initialGetBackoff = 20 * time.Second
-
-	// Head of line job will not be bumped from the head of line for at least HeadOfLineReservationTime
-	// Setting to 0 disables this mechanism
-//	HeadOfLineReservationTime = 25 * time.Second
-
 )
 
 // controllerKind contains the schema.GroupVersionKind for this controller type.

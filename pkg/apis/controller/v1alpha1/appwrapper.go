@@ -50,8 +50,8 @@ type AppWrapperList struct {
 
 // AppWrapperSpec describes how the App Wrapper will look like.
 type AppWrapperSpec struct {
-	Priority      float64                    `json:"priority,omitempty"`
-	PrioritySlope float64                    `json:"priorityslope,omitempty"`
+	Priority      float64                `json:"priority,omitempty"`
+	PrioritySlope float64                `json:"priorityslope,omitempty"`
 	Service       AppWrapperService      `json:"service"`
 	AggrResources AppWrapperResourceList `json:"resources"`
 
@@ -110,8 +110,8 @@ const (
 	ResourceTypeStatefulSet 			ResourceType = "StatefulSet"
 	ResourceTypeDeployment  			ResourceType = "Deployment"
 	ResourceTypeReplicaSet  			ResourceType = "ReplicaSet"
-	ResourceTypePersistentVolume		ResourceType = "PersistentVolume"
-	ResourceTypePersistentVolumeClaim	ResourceType = "PersistentVolumeClaim"
+	ResourceTypePersistentVolume			ResourceType = "PersistentVolume"
+	ResourceTypePersistentVolumeClaim		ResourceType = "PersistentVolumeClaim"
 	ResourceTypeNamespace				ResourceType = "Namespace"
 	ResourceTypeConfigMap				ResourceType = "ConfigMap"
 	ResourceTypeNetworkPolicy			ResourceType = "NetworkPolicy"
@@ -149,13 +149,13 @@ type AppWrapperStatus struct {
 
 	Message string `json:"message,omitempty"`
 
-	//System defined Priority
+	// System defined Priority
 	SystemPriority float64 `json:"systempriority,omitempty"`
 
-	//State of QueueJob - Init, Queueing, HeadOfLine, Rejoining, ...
+	// State of QueueJob - Init, Queueing, HeadOfLine, Rejoining, ...
 	QueueJobState QueueJobState `json:"queuejobstate,omitempty"`
 
-	//Timestamp when controller first sees QueueJob (by Informer)
+	// Timestamp when controller first sees QueueJob (by Informer)
 	ControllerFirstTimestamp metav1.Time `json:"controllerfirsttimestamp,omitempty"`
 
 	// Tell Informer to ignore this update message (do not generate a controller event)
