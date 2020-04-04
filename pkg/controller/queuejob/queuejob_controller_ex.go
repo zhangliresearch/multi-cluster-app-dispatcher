@@ -551,6 +551,8 @@ func (qjm *XController) ScheduleNext() {
 	if err != nil {
 		glog.V(4).Infof("Cannot pop QueueJob from the queue!")
 	}
+	qjm.qjqueue.AddUnschedulableIfNotPresent(qj)  // working on qj, avoid other threads putting it back to activeQ
+	qj.Status.QueueJobState = arbv1.QueueJobStateHeadOfLine
 	glog.V(10).Infof("[TTime] %s, %s: ScheduleNextStart", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
 	// glog.Infof("I have queuejob %+v", qj)
 	if(qjm.isDispatcher) {
@@ -604,30 +606,33 @@ func (qjm *XController) ScheduleNext() {
 				if e != nil {
 					return
 				}
+				if larger(apiQueueJob.ResourceVersion, qj.ResourceVersion) {
+					glog.V(10).Infof("[ScheduleNext] %s found more recent copy from cache          &qj=%p          qj=%+v", qj.Name, qj, qj)
+					glog.V(10).Infof("[ScheduleNext] %s found more recent copy from cache &apiQueueJob=%p apiQueueJob=%+v", apiQueueJob.Name, apiQueueJob, apiQueueJob)
+					apiQueueJob.DeepCopyInto(qj)
+				}
 				desired := int32(0)
-				for i, ar := range apiQueueJob.Spec.AggrResources.Items {
+				for i, ar := range qj.Spec.AggrResources.Items {
 					desired += ar.Replicas
-					apiQueueJob.Spec.AggrResources.Items[i].AllocatedReplicas = ar.Replicas
+					qj.Spec.AggrResources.Items[i].AllocatedReplicas = ar.Replicas
 				}
 				glog.V(10).Infof("[TTime]%s:  %s, ScheduleNextBeforeEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
-				apiQueueJob.Status.CanRun = true
 				qj.Status.CanRun = true
-				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(apiQueueJob); err != nil {
-					glog.Errorf("Failed to update status of AppWrapper %v/%v: %v",
-						qj.Namespace, qj.Name, err)
+				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj); err != nil {
+					glog.Errorf("Failed to update status of AppWrapper %v/%v: %v", qj.Namespace, qj.Name, err)
 				}
 				glog.V(10).Infof("[TTime]%s: %s, ScheduleNextAfterEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+				qjm.qjqueue.Delete(qj)
+				dispatched = true
+				glog.V(10).Infof("[ScheduleNext] after qjqueue delete %s activeQ=%t, unsched=%t Status=%+v", qj.Name, qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
 			} else { // Not enough free resources to dispatch HeadOfLine job
-				glog.V(10).Infof("[ScheduleNext] HOL Holding before AddUnsched by %s for %s activeQ=%t unschedQ=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
-				qjm.qjqueue.Delete(qj) // Delete from activeQ in case other threads add it back
-				qjm.qjqueue.AddUnschedulableIfNotPresent(qj)
-				glog.V(10).Infof("[ScheduleNext] HOL Holding after  AddUnsched by %s for %s activeQ=%t unschedQ=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
+				glog.V(10).Infof("[ScheduleNext] HOL holding %s for %s activeQ=%t unschedQ=%t Status=%+v", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
 				time.Sleep(time.Second * 1) // Try to dispatch once per second
 			}
 		}
 		if !dispatched {
 			// start thread to backoff
-			glog.V(10).Infof("[ScheduleNext] HOL backoff %s after waiting for %s activeQ=%t Unsched=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
+			glog.V(10).Infof("[ScheduleNext] HOL %s going backoff after waiting for %s activeQ=%t unsched=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
 			go qjm.backoff(qj)
 		}
 	}
@@ -637,9 +642,11 @@ func (qjm *XController) ScheduleNext() {
 func (qjm *XController) backoff(q *arbv1.AppWrapper) {
 	q.Status.QueueJobState = arbv1.QueueJobStateRejoining
 	qjm.qjqueue.AddUnschedulableIfNotPresent(q)
+	glog.V(10).Infof("[backoff] %s before sleep for %d seconds, activeQ=%t unsched=%t Status=%+v", q.Name, qjm.serverOption.BackoffTime, qjm.qjqueue.IfExistActiveQ((q)), qjm.qjqueue.IfExistUnschedulableQ((q)), q.Status)
 	time.Sleep(time.Duration(qjm.serverOption.BackoffTime) * time.Second)
 	qjm.qjqueue.MoveToActiveQueueIfExists(q)
 	q.Status.QueueJobState = arbv1.QueueJobStateQueueing
+	glog.V(10).Infof("[backoff] %s after  sleep for %d seconds, activeQ=%t unsched=%t Status=%+v", q.Name, qjm.serverOption.BackoffTime, qjm.qjqueue.IfExistActiveQ((q)), qjm.qjqueue.IfExistUnschedulableQ((q)), q.Status)
 }
 
 // Run start AppWrapper Controller
@@ -727,6 +734,13 @@ func (cc *XController) updateQueueJob(oldObj, newObj interface{}) {
 	}
 	glog.V(10).Infof("[TTime] %s, %s: updateQueueJob delay: %s", time.Now().String(), newQJ.Name, time.Now().Sub(newQJ.CreationTimestamp.Time))
 	cc.enqueue(newQJ)
+}
+
+// a, b arbitrary length numerical string (ResourceVersion).  returns true if a is larger than b
+func larger (a, b string) bool {
+	if len(a) > len(b) { return true  } // Longer string is larger
+	if len(a) < len(b) { return false } // Longer string is larger
+	return a > b // Equal length, lexicographic order
 }
 
 func (cc *XController) deleteQueueJob(obj interface{}) {
