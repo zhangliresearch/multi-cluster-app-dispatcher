@@ -940,6 +940,10 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 
 			qj.Status.State = arbv1.AppWrapperStateEnqueued
 			glog.V(10).Infof("[TTime] %s, %s: WorkerBeforeEtcd", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+			_, err := cc.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj)
+			if err != nil {
+				return err
+			}
 
 			//  add qj to activeQ only when it is not in unschedulableQ
 			if cc.qjqueue.IfExistUnschedulableQ(qj) {
