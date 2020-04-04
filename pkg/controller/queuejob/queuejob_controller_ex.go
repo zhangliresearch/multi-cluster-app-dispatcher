@@ -944,7 +944,11 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 			if err != nil {
 				return err
 			}
+			return nil
+		}  // End of first execution of qj, result set Status.State = Enqueued
 
+		// Second execution of qj to add to qjqueue for ScheduleNext
+		if !qj.Status.CanRun && qj.Status.State == arbv1.AppWrapperStateEnqueued {
 			//  add qj to activeQ only when it is not in unschedulableQ
 			if cc.qjqueue.IfExistUnschedulableQ(qj) {
 				glog.V(10).Infof("[worker-manageQJ] leaving %s to unschedulableQ, Status=%+v", qj.Name, qj.Status)
