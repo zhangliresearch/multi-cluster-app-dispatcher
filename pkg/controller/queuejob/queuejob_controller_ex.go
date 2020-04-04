@@ -590,7 +590,9 @@ func (qjm *XController) ScheduleNext() {
 			go qjm.backoff(qj)
 		}
 	} else {						// Agent Mode
+		glog.V(2).Infof("[ScheduleNext] qj=%s before aggqj", qj.Name)
 		aggqj := qjm.GetAggregatedResources(qj)
+		glog.V(2).Infof("[ScheduleNext] qj=%s aggqj=%+v", qj.Name, aggqj)
 
 		// HeadOfLine logic
 		HOLStartTime := time.Now()
@@ -616,17 +618,19 @@ func (qjm *XController) ScheduleNext() {
 					desired += ar.Replicas
 					qj.Spec.AggrResources.Items[i].AllocatedReplicas = ar.Replicas
 				}
-				glog.V(10).Infof("[TTime]%s:  %s, ScheduleNextBeforeEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+				glog.V(2).Infof("[TTime]%s:  %s, ScheduleNextBeforeEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
 				qj.Status.CanRun = true
-				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj); err != nil {
+/*				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj); err != nil {
 					glog.Errorf("Failed to update status of AppWrapper %v/%v: %v", qj.Namespace, qj.Name, err)
 				}
-				glog.V(10).Infof("[TTime]%s: %s, ScheduleNextAfterEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+*/				glog.V(10).Infof("[TTime]%s: %s, ScheduleNextAfterEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+				glog.V(2).Infof("[ScheduleNext] before eventQueue.Add %s: &qj=%p version=%s Status=%+v", qj.Name, qj, qj.ResourceVersion, qj.Status)
+				qjm.eventQueue.Add(qj)  // add to eventQueue for dispatching to Etcd
 				qjm.qjqueue.Delete(qj)
 				dispatched = true
 				glog.V(10).Infof("[ScheduleNext] after qjqueue delete %s activeQ=%t, unsched=%t Status=%+v", qj.Name, qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
 			} else { // Not enough free resources to dispatch HeadOfLine job
-				glog.V(10).Infof("[ScheduleNext] HOL holding %s for %s activeQ=%t unschedQ=%t Status=%+v", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
+				glog.V(2).Infof("[ScheduleNext] HOL holding %s for %s activeQ=%t unschedQ=%t Status=%+v", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj.Status)
 				time.Sleep(time.Second * 1) // Try to dispatch once per second
 			}
 		}
