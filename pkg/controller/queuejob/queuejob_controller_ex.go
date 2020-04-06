@@ -843,7 +843,7 @@ func (cc *XController) worker() {
 			glog.Errorf("Un-supported type of %v", obj)
 			return nil
 		}
-		glog.V(10).Infof("[TTime] %s: %s, WorkerFromEventQueue delay: %s - Pop Begin ", time.Now().String(), queuejob.Name, time.Now().Sub(queuejob.CreationTimestamp.Time))
+		glog.V(10).Infof("[TTime] %s: %s, WorkerFromEventQueue delay: %s - Pop Begin Status=%+v", time.Now().String(), queuejob.Name, time.Now().Sub(queuejob.CreationTimestamp.Time), queuejob.Status)
 
 		if queuejob == nil {
 			if acc, err := meta.Accessor(obj); err != nil {
