@@ -1232,6 +1232,7 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 //Cleanup function
 func (cc *XController) Cleanup(queuejob *arbv1.AppWrapper) error {
 	glog.V(4).Infof("[Cleanup] begin AppWrapper %s version=%s Status=%+v\n", queuejob.Name, queuejob.ResourceVersion, queuejob.Status)
+
 	if !cc.isDispatcher {
 		if queuejob.Spec.AggrResources.Items != nil {
 			// we call clean-up for each controller
