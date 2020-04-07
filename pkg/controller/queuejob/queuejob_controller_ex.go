@@ -726,7 +726,7 @@ func (cc *XController) addQueueJob(obj interface{}) {
 		return
 	}
 	glog.V(10).Infof("[TTime] %s, %s: AddedQueueJob delay: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
-	glog.V(4).Infof("QueueJob added - info -  %+v")
+	glog.V(4).Infof("[addQueueJob] qj=%+v", qj)
 	cc.enqueue(qj)
 }
 
@@ -736,7 +736,8 @@ func (cc *XController) updateQueueJob(oldObj, newObj interface{}) {
 		glog.Errorf("newObj is not AppWrapper")
 		return
 	}
-	glog.V(10).Infof("[TTime] %s, %s: updateQueueJob delay: %s", time.Now().String(), newQJ.Name, time.Now().Sub(newQJ.CreationTimestamp.Time))
+	glog.V(4).Infof("[updateQueueJob] %s, %s: updateQueueJob delay: %s old=+v", time.Now().String(), newQJ.Name, time.Now().Sub(newQJ.CreationTimestamp.Time), oldObj.(*arbv1.AppWrapper))
+	glog.V(4).Infof("[updateQueueJob] %s, %s: updateQueueJob delay: %s new=+v", time.Now().String(), newQJ.Name, time.Now().Sub(newQJ.CreationTimestamp.Time), newQJ)
 	cc.enqueue(newQJ)
 }
 
