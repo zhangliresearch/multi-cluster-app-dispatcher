@@ -620,10 +620,10 @@ func (qjm *XController) ScheduleNext() {
 				}
 				glog.V(2).Infof("[TTime]%s:  %s, ScheduleNextBeforeEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
 				qj.Status.CanRun = true
-/*				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj); err != nil {
+				if _, err := qjm.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj); err != nil {
 					glog.Errorf("Failed to update status of AppWrapper %v/%v: %v", qj.Namespace, qj.Name, err)
 				}
-*/				glog.V(10).Infof("[TTime]%s: %s, ScheduleNextAfterEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
+				glog.V(10).Infof("[TTime]%s: %s, ScheduleNextAfterEtcd duration timestamp: %s", time.Now().String(), qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
 				glog.V(2).Infof("[ScheduleNext] before eventQueue.Add %s: &qj=%p version=%s Status=%+v", qj.Name, qj, qj.ResourceVersion, qj.Status)
 				qjm.eventQueue.Add(qj)  // add to eventQueue for dispatching to Etcd
 				qjm.qjqueue.Delete(qj)
@@ -940,11 +940,11 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 
 			qj.Status.State = arbv1.AppWrapperStateEnqueued
 			glog.V(10).Infof("[TTime] %s, %s: WorkerBeforeEtcd", qj.Name, time.Now().Sub(qj.CreationTimestamp.Time))
-			_, err := cc.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj)
+/*			_, err := cc.arbclients.ArbV1().AppWrappers(qj.Namespace).Update(qj)
 			if err != nil {
 				return err
 			}
-
+*/
 			//  add qj to activeQ only when it is not in unschedulableQ
 			if cc.qjqueue.IfExistUnschedulableQ(qj) {
 				glog.V(10).Infof("[worker-manageQJ] leaving %s to unschedulableQ, Status=%+v", qj.Name, qj.Status)

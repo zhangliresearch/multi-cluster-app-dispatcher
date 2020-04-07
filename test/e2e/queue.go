@@ -17,7 +17,7 @@ limitations under the License.
 package e2e
 
 import (
-	"github.com/golang/glog"
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -29,11 +29,11 @@ var _ = Describe("Predicates E2E Test", func() {
 		defer cleanupTestContext(context)
 
 		aw := createDeploymentAW(context,"aw-deployment-1")
-		glog.V(2).Infof("aw-deployment-1-context=%+v", context)
-		glog.V(2).Infof("aw-deployment-1=%+v", aw)
+		fmt.Printf("aw-deployment-1-context=%+v", context)
+		fmt.Printf("aw-deployment-1=%+v", aw)
 
 		err := waitAWReady(context, aw)
-		glog.V(2).Infof("aw-deployment-1 err%+v", err)
+		fmt.Printf("aw-deployment-1 err%+v", err)
 
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -47,11 +47,11 @@ var _ = Describe("Predicates E2E Test", func() {
 		defer cleanupTestContext(context)
 
 		aw := createBadPodTemplateAW(context,"aw-podtemplate-2")
-		glog.V(2).Infof("aw-deployment-2-context=%+v", context)
-		glog.V(2).Infof("aw-deployment-2=%+v", aw)
+		fmt.Printf("aw-deployment-2-context=%+v", context)
+		fmt.Printf("aw-deployment-2=%+v", aw)
 
 		err := waitAWReady(context, aw)
-		glog.V(2).Infof("aw-deployment-2 err%+v", err)
+		fmt.Printf("aw-deployment-2 err%+v", err)
 
 		Expect(err).To(HaveOccurred())
 	})
@@ -61,11 +61,11 @@ var _ = Describe("Predicates E2E Test", func() {
 		defer cleanupTestContext(context)
 
 		aw := createPodTemplateAW(context,"aw-podtemplate-2")
-		glog.V(2).Infof("aw-podtemplate-2-context=%+v", context)
-		glog.V(2).Infof("aw-podtemplate-2=%+v", aw)
+		fmt.Printf("aw-podtemplate-2-context=%+v", context)
+		fmt.Printf("aw-podtemplate-2=%+v", aw)
 
 		err := waitAWReady(context, aw)
-		glog.V(2).Infof("aw-podtemplate-2 err%+v", err)
+		fmt.Printf("aw-podtemplate-2 err%+v", err)
 
 		Expect(err).NotTo(HaveOccurred())
 	})
