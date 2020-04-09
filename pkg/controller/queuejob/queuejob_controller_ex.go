@@ -809,21 +809,19 @@ func (cc *XController) addQueueJob(obj interface{}) {
 		glog.Errorf("obj is not AppWrapper")
 		return
 	}
-	glog.V(10).Infof("[Informer-AddQJ] %s &qj=%p  qj=%+v", qj.Name, qj, qj)
+	glog.V(10).Infof("[Informer-addQJ] %s &qj=%p  qj=%+v", qj.Name, qj, qj)
 	if qj.Status.QueueJobState == "" {
 		qj.Status.ControllerFirstTimestamp = firstTime
 		qj.Status.SystemPriority = qj.Spec.Priority
 		qj.Status.QueueJobState  = arbv1.QueueJobStateInit
-		glog.V(10).Infof("[Informer-AddQJ] now=%s %s CreationTimestamp=%s ControllerFirstTimestamp=%s 0Delay=%s",
-			time.Now(), qj.Name, qj.CreationTimestamp, qj.Status.ControllerFirstTimestamp,
-			time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time))
+		glog.V(4).Infof("[Informer-addQJ] %s 0Delay=%s CreationTimestamp=%s ControllerFirstTimestamp=%s",
+			qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qj.CreationTimestamp, qj.Status.ControllerFirstTimestamp)
 	} else {
-		glog.V(10).Infof("[Informer-AddQJ] now=%s %s CreationTimestamp=%s ControllerFirstTimestamp=%s *Delay=%s",
-			time.Now(), qj.Name, qj.CreationTimestamp, qj.Status.ControllerFirstTimestamp,
-			time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time))
+		glog.V(4).Infof("[Informer-addQJ] %s *Delay=%s CreationTimestamp=%s ControllerFirstTimestamp=%s",
+			qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qj.CreationTimestamp, qj.Status.ControllerFirstTimestamp)
 	}
-	glog.V(10).Infof("[Informer-AddQJ] %s &qj=%p  qj=%+v", qj.Name, qj, qj)
-	glog.V(4).Infof("[Informer-AddQJ] enqueue QueueJob %s Status=%+v", qj.Name, qj.Status)
+	glog.V(10).Infof("[Informer-addQJ] %s &qj=%p  qj=%+v", qj.Name, qj, qj)
+	glog.V(4).Infof("[Informer-addQJ] enqueue QueueJob %s version=%s Status=%+v", qj.Name, qj.ResourceVersion, qj.Status)
 	cc.enqueue(qj)
 }
 
@@ -1091,8 +1089,8 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 				qj.Status.FilterIgnore = true  // Update Queueing status, add to qjqueue for ScheduleNext
 				cc.updateEtcd(qj, "[manageQueueJob]setQueueing", SendUpdate)
 				cc.qjqueue.AddIfNotPresent(qj)
-				glog.V(10).Infof("[worker-manageQJ] after  add to activeQ %s 1Delay=%s version=%s activeQ=%t Unsched=%t QueueJobState=%s",
-					qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qj.ResourceVersion, cc.qjqueue.IfExistActiveQ(qj), cc.qjqueue.IfExistUnschedulableQ(qj), qj.Status.QueueJobState)
+				glog.V(4).Infof("[worker-manageQJ] %s 1Delay=%s AfterAddToActiveQ activeQ=%t Unsched=%t version=%s Status=%+v",
+					qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), cc.qjqueue.IfExistActiveQ(qj), cc.qjqueue.IfExistUnschedulableQ(qj), qj.ResourceVersion, qj.Status)
 			}
 			return nil
 		} // End of second execution of qj to add to qjqueue for ScheduleNext
@@ -1123,7 +1121,7 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 				}
 			}
 			glog.V(10).Infof("[worker-manageQJ] before [ar.Type].SyncQueueJob Version=%s Local=%t Sender=%s &qj=%p qj=%+v", qj.ResourceVersion, qj.Status.Local, qj.Status.Sender, qj, qj)
-			glog.V(4).Infof("[worker-manageQJ] before dispatching to Etcd %s 2Delay=%s version=%s Status=%+v",
+			glog.V(4).Infof("[worker-manageQJ] %s 3Delay=%s BeforeDispatchingToEtcd version=%s Status=%+v",
 				qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qj.ResourceVersion, qj.Status)
 			success := false
 			for _, ar := range qj.Spec.AggrResources.Items {
@@ -1139,17 +1137,18 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 			}
 			if success { // set QueueJobStateRunning if at least one resource is successfully dispatched
 				qj.Status.QueueJobState = arbv1.QueueJobStateDispatched
+				glog.V(4).Infof("[worker-manageQJ] %s 4Delay=%s AtLeastOneResourceDispatchedToEtcd version=%s Status=%+v",
+					qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qj.ResourceVersion, qj.Status)
 			}
 			if glog.V(10) {
 				if (is_first_deployment) {
-					glog.V(4).Infof("[worker-manageQJ] %s, 3Delay=%s: WorkerAfterCreatingResouces", qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time))
 					glog.V(10).Infof("[worker-manageQJ] After  [ar.Type].SyncQueueJob %s version=%s Status=%+v", qj.Name, qj.ResourceVersion, qj.Status)
 				}
 			}
 
 			// TODO(k82cn): replaced it with `UpdateStatus`
 //			cc.qjobResControls[ar.Type].SyncQueueJob(qj, &ar) could have updated Etcd
-			qj.Status.FilterIgnore = false  // keep original behavior
+			qj.Status.FilterIgnore = true  // true may not work // keep original behavior
 			if err := cc.updateEtcd(qj, "[manageQueueJob]after[ar.Type].SyncQueueJob", SendUpdate); err != nil {
 				return err
 			}
