@@ -6,24 +6,24 @@ spec:
   schedSpec:
     minAvailable: 1
   priority: 800
-  priorityslope: 20
+  priorityslope: 30
   resources:
     Items:
     - replicas: 2
       type: Pod
       template:
         metadata: 
-          name: helloli-awp-800-20
+          name: helloli-awp-800-30
           labels:
-            name: helloli-awp-800-20
+            name: helloli-awp-800-30
         template:
           metadata:
-            name: helloli-awp-800-20
+            name: helloli-awp-800-30
             labels:
-              name: helloli-awp-800-20
+              name: helloli-awp-800-30
           spec:
             containers:
-            - name: helloli-awp-800-20
+            - name: helloli-awp-800-30
               image: nginx
               command: ["sleep", "85"]
               ports:
