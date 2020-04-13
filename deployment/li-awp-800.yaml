@@ -1,7 +1,7 @@
 apiVersion: arbitrator.incubator.k8s.io/v1alpha1
 kind: AppWrapper
 metadata:
-  name: helloli-awp-800-20
+  name: helloli-awp-800-30
 spec:
   schedSpec:
     minAvailable: 1
@@ -25,7 +25,7 @@ spec:
             containers:
             - name: helloli-awp-800-30
               image: nginx
-              command: ["sleep", "85"]
+              command: ["sleep", "80"]
               ports:
               - containerPort: 80
               resources:
