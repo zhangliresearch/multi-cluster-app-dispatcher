@@ -313,13 +313,9 @@ func (qjrPod *QueueJobResPod) manageQueueJob(qj *arbv1.AppWrapper, pods []*v1.Po
 		}
 		wait.Wait()
 
-		qj.Status.QueueJobState = arbv1.QueueJobStateDispatched
 		if len(errs) != 0 {
-			qj.Status.QueueJobState = arbv1.QueueJobStateFailed
 			return fmt.Errorf("failed to create %d pods of %d", len(errs), diff)
 		}
-	} else {
-		qj.Status.QueueJobState = arbv1.QueueJobStateRunning
 	}
 
 	qj.Status.Pending   = pending
@@ -567,12 +563,12 @@ func (qjrPod *QueueJobResPod) GetAggregatedResources(job *arbv1.AppWrapper) *clu
         return total
 }
 
-func (qjrPod *QueueJobResPod) GetAggregatedResourcesByPriority(priority int, job *arbv1.AppWrapper) *clusterstateapi.Resource {
+func (qjrPod *QueueJobResPod) GetAggregatedResourcesByPriority(priority float64, job *arbv1.AppWrapper) *clusterstateapi.Resource {
 	total := clusterstateapi.EmptyResource()
 	if job.Spec.AggrResources.Items != nil {
 		//calculate scaling
 		for _, ar := range job.Spec.AggrResources.Items {
-			if ar.Priority < float64(priority) {
+			if ar.Priority < priority {
 		  		continue
 		  	}
 

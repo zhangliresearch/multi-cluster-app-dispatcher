@@ -138,12 +138,12 @@ func (qjrDeployment *QueueJobResDeployment) GetAggregatedResources(job *arbv1.Ap
 	return total
 }
 
-func (qjrDeployment *QueueJobResDeployment) GetAggregatedResourcesByPriority(priority int, job *arbv1.AppWrapper) *clusterstateapi.Resource {
+func (qjrDeployment *QueueJobResDeployment) GetAggregatedResourcesByPriority(priority float64, job *arbv1.AppWrapper) *clusterstateapi.Resource {
         total := clusterstateapi.EmptyResource()
         if job.Spec.AggrResources.Items != nil {
             //calculate scaling
             for _, ar := range job.Spec.AggrResources.Items {
-                  if ar.Priority < float64(priority) {
+                  if ar.Priority < priority {
                         continue
                   }
                   if ar.Type == arbv1.ResourceTypeDeployment {
@@ -220,7 +220,7 @@ func (qjrDeployment *QueueJobResDeployment) createDeploymentWithControllerRef(na
 		deployment.OwnerReferences = append(deployment.OwnerReferences, *controllerRef)
 	}
 
-	glog.V(10).Infof("[LiZ] Before DeploymentCreate qjrDeployment=%s", qjrDeployment)
+	glog.V(10).Infof("[createDeploymentWithControllerRef] Before DeploymentCreate qjrDeployment=%s", qjrDeployment)
 	if _, err := qjrDeployment.clients.AppsV1beta1().Deployments(namespace).Create(deployment); err != nil {
 		return err
 	}
@@ -292,15 +292,11 @@ func (qjrDeployment *QueueJobResDeployment) SyncQueueJob(queuejob *arbv1.AppWrap
 					return
 				}
 				if err != nil {
-					queuejob.Status.QueueJobState = arbv1.QueueJobStateFailed
 					defer utilruntime.HandleError(err)
 				}
 			}()
 		}
 		wait.Wait()
-		queuejob.Status.QueueJobState = arbv1.QueueJobStateDispatched
-	} else {
-		queuejob.Status.QueueJobState = arbv1.QueueJobStateRunning
 	}
 
 	return nil
