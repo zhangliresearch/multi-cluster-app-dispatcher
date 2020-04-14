@@ -276,9 +276,9 @@ func (qjrDeployment *QueueJobResDeployment) SyncQueueJob(queuejob *arbv1.AppWrap
 		}
 		deploymentInQjr.Labels[queueJobName] = queuejob.Name
 		if deploymentInQjr.Spec.Template.Labels == nil {
-            deploymentInQjr.Labels = map[string]string{}
-    	}
-    	deploymentInQjr.Spec.Template.Labels[queueJobName] = queuejob.Name
+			deploymentInQjr.Labels = map[string]string{}
+		}
+		deploymentInQjr.Spec.Template.Labels[queueJobName] = queuejob.Name
 
 		wait := sync.WaitGroup{}
 		wait.Add(int(diff))
