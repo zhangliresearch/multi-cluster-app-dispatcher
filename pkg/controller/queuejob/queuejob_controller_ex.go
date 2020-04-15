@@ -562,7 +562,7 @@ func (qjm *XController) ScheduleNext() {
 	glog.V(10).Infof("[ScheduleNext] BeforePop qjqLength=%d",qjm.qjqueue.Length())
 	qj, err := qjm.qjqueue.Pop()
 	if err != nil {
-		glog.V(4).Infof("[ScheduleNext] Cannot pop QueueJob from qjqueue! err=%#v")
+		glog.V(4).Infof("[ScheduleNext] Cannot pop QueueJob from qjqueue! err=%#v", err)
 		return // Try to pop qjqueue again
 	} else {
 		glog.V(4).Infof("[ScheduleNext] activeQ.Pop %s *Delay=%.6f seconds RemainingLength=%d &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.Length(), qj, qj.ResourceVersion, qj.Status)
@@ -570,7 +570,6 @@ func (qjm *XController) ScheduleNext() {
 	if qjm.serverOption.Demo {
 		time.Sleep(time.Millisecond * 100)
 	}
-
 
 	// Re-compute SystemPriority for DynamicPriority policy
 	if qjm.serverOption.DynamicPriority {
@@ -605,7 +604,7 @@ func (qjm *XController) ScheduleNext() {
 		// Retrive HeadOfLine after priority update
 		qj, err = qjm.qjqueue.Pop()
 		if err != nil {
-			glog.V(4).Infof("[ScheduleNext] Cannot pop QueueJob from qjqueue! err=%#v")
+			glog.V(4).Infof("[ScheduleNext] Cannot pop QueueJob from qjqueue! err=%#v", err)
 		} else {
 			glog.V(4).Infof("[ScheduleNext] activeQ.Pop_afterPriorityUpdate %s *Delay=%.6f seconds RemainingLength=%d &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.Length(), qj, qj.ResourceVersion, qj.Status)
 		}
