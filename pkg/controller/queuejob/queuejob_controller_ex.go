@@ -694,7 +694,7 @@ func (qjm *XController) ScheduleNext() {
 				} else { // successful add to eventQueue, remove from qjqueue
 					qjm.qjqueue.Delete(qj)
 					forwarded = true
-					glog.V(4).Infof("[ScheduleNext] %s 2Delay=%s eventQueue.Add_afterHeadOfLine activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, metav1.Now().Sub(qj.Status.ControllerFirstTimestamp.Time), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
+					glog.V(4).Infof("[ScheduleNext] %s 2Delay=%.6f seconds eventQueue.Add_afterHeadOfLine activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 					if qjm.serverOption.Demo { // Delay 9.9 sec for Demo only
 						time.Sleep(time.Millisecond * 9900)
 					}
