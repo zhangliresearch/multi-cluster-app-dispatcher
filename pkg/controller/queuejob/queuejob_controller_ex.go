@@ -511,7 +511,7 @@ func (qjm *XController) getAggregatedAvailableResourcesPriority(targetpr float64
 					for _, resctrl := range qjm.qjobResControls {
 						qjv := resctrl.GetAggregatedResources(value)
 						pending = pending.Add(qjv)
-						glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v for job %s which can-run is set to: %v and status set to: %s but no pod counts in the state have been defined.", qjv, value.Name, value.Status.CanRun, value.Status.State)
+						glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v in resctrlType=%T for job %s which can-run is set to: %v and status set to: %s but no pod counts in the state have been defined.", qjv, resctrl, value.Name, value.Status.CanRun, value.Status.State)
 					}
 				}
 			}
@@ -580,8 +580,10 @@ func (qjm *XController) ScheduleNext() {
 		for qjm.qjqueue.Length() > 0 {
 			qjtemp, _ := qjm.qjqueue.Pop()
 			qjtemp.Status.SystemPriority = qjtemp.Spec.Priority + qjtemp.Spec.PrioritySlope * (time.Now().Sub(qjtemp.Status.ControllerFirstTimestamp.Time)).Seconds()
-			qjtemp.Status.FilterIgnore = true   // update SystemPriority only
-			qjm.updateEtcd(qjtemp, "[ScheduleNext]updateSystemPriority", SendUpdate)
+			if qjm.serverOption.Demo {
+				qjtemp.Status.FilterIgnore = true   // update SystemPriority only
+				qjm.updateEtcd(qjtemp, "[ScheduleNext]updateSystemPriority", SendUpdate)
+			}
 			tempQ.Add(qjtemp)
 		}
 		// move AppWrappers back to activeQ and sort based on SystemPriority
