@@ -774,6 +774,7 @@ func (cc *XController) Run(stopCh chan struct{}) {
 
 	cache.WaitForCacheSync(stopCh, cc.queueJobSynced)
 
+	// update snapshot of ClientStateCache every second
 	cc.cache.Run(stopCh)
 
 	// go wait.Until(cc.ScheduleNext, 2*time.Second, stopCh)
@@ -807,12 +808,21 @@ func (qjm *XController) UpdateAgent() {
 }
 
 func (qjm *XController) UpdateQueueJobs() {
+	firstTime := metav1.NowMicro()
 	queueJobs, err := qjm.queueJobLister.AppWrappers("").List(labels.Everything())
 	if err != nil {
 		glog.Errorf("[UpdateQueueJobs] List of queueJobs err=%+v", err)
 		return
 	}
 	for _, newjob := range queueJobs {
+		// UpdateQueueJobs can be the first to see a new AppWrapper job, under heavy load
+		if newjob.Status.QueueJobState == "" {
+			newjob.Status.ControllerFirstTimestamp = firstTime
+			newjob.Status.SystemPriority = newjob.Spec.Priority
+			newjob.Status.QueueJobState = arbv1.QueueJobStateInit
+			glog.V(4).Infof("[UpdateQueueJobs] %s 0Delay=%.6f seconds CreationTimestamp=%s ControllerFirstTimestamp=%s",
+				newjob.Name, time.Now().Sub(newjob.Status.ControllerFirstTimestamp.Time).Seconds(), newjob.CreationTimestamp, newjob.Status.ControllerFirstTimestamp)
+		}
 		glog.V(10).Infof("[UpdateQueueJobs] %s: qjqueue=%t &qj=%p Version=%s Status=%+v", newjob.Name, qjm.qjqueue.IfExist(newjob), newjob, newjob.ResourceVersion, newjob.Status)
 		if !qjm.qjqueue.IfExist(newjob) {
 			glog.V(4).Infof("[UpdateQueueJobs] enqueue %s &qj=%p Version=%s Status=%+v", newjob.Name, newjob, newjob.ResourceVersion, newjob.Status)
