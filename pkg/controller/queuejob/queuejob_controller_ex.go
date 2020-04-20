@@ -63,8 +63,8 @@ import (
 
 	"github.com/IBM/multi-cluster-app-dispatcher/pkg/controller/queuejobdispatch"
 
-	clusterstateapi "github.com/IBM/multi-cluster-app-dispatcher/pkg/controller/clusterstate/api"
 	clusterstatecache "github.com/IBM/multi-cluster-app-dispatcher/pkg/controller/clusterstate/cache"
+	clusterstateapi "github.com/IBM/multi-cluster-app-dispatcher/pkg/controller/clusterstate/api"
 )
 
 const (
@@ -488,11 +488,10 @@ func (qjm *XController) getAggregatedAvailableResourcesPriority(targetpr float64
 			continue
 		} else if value.Status.State == arbv1.AppWrapperStateEnqueued {
 			// Don't count the resources that can run but not yet realized (job orchestration pending or partially running).
-			glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources for job %s which can-run is set to: %v but state is still pending.", value.Name, value.Status.CanRun)
 			for _, resctrl := range qjm.qjobResControls {
 				qjv := resctrl.GetAggregatedResources(value)
 				pending = pending.Add(qjv)
-				glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v for job %s which can-run is set to: %v but state is still pending.", qjv, value.Name, value.Status.CanRun)
+				glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v in resctrlType=%T for job %s which can-run is set to: %v but state is still pending.", qjv, resctrl, value.Name, value.Status.CanRun)
 			}
 			continue
 		} else if value.Status.State == arbv1.AppWrapperStateActive {
@@ -501,7 +500,7 @@ func (qjm *XController) getAggregatedAvailableResourcesPriority(targetpr float64
 				for _, resctrl := range qjm.qjobResControls {
 					qjv := resctrl.GetAggregatedResources(value)
 					pending = pending.Add(qjv)
-					glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v for job %s which can-run is set to: %v and status set to: %s but %v pod(s) are pending.", qjv, value.Name, value.Status.CanRun, value.Status.State, value.Status.Pending)
+					glog.V(10).Infof("[getAggAvaiResPri] Subtract all resources %+v in resctrlType=%T for job %s which can-run is set to: %v and status set to: %s but %v pod(s) are pending.", qjv, resctrl, value.Name, value.Status.CanRun, value.Status.State, value.Status.Pending)
 				}
 			} else {
 				// TODO: Hack to handle race condition when Running jobs have not yet updated the pod counts
@@ -556,7 +555,7 @@ func (qjm *XController) ScheduleNext() {
 	// check if we have enough compute resources for it
 	// if we have enough compute resources then we set the AllocatedReplicas to the total
 	// amount of resources asked by the job
-	glog.V(10).Infof("[ScheduleNext] isDispatcher=%t &serverOption=%p serverOption=%+v", qjm.isDispatcher, qjm.serverOption, qjm.serverOption)
+	glog.V(10).Infof("[ScheduleNext] &serverOption=%p serverOption=%+v", qjm.serverOption, qjm.serverOption)
 	SendUpdate := qjm.serverOption.SendUpdate
 
 	glog.V(10).Infof("[ScheduleNext] BeforePop qjqLength=%d",qjm.qjqueue.Length())
@@ -665,7 +664,6 @@ func (qjm *XController) ScheduleNext() {
 			// Disable Preemption under DynamicPriority.  Comment out if allow DynamicPriority and Preemption at the same time.
 			if qjm.serverOption.DynamicPriority { priorityindex = -math.MaxFloat64 }
 			resources := qjm.getAggregatedAvailableResourcesPriority(priorityindex, qj.Name)
-	//		resources := qjm.getAggregatedAvailableResourcesPriority(qj.Status.SystemPriority, qj.Name)
 			glog.V(2).Infof("[ScheduleNext] XQJ %s with resources %v to be scheduled on aggregated idle resources %v", qj.Name, aggqj, resources)
 
 			if aggqj.LessEqual(resources) {
@@ -1085,7 +1083,6 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 		if !qj.Status.CanRun && (qj.Status.State != arbv1.AppWrapperStateEnqueued && qj.Status.State != arbv1.AppWrapperStateDeleted) {
 			// if there are running resources for this job then delete them because the job was put in
 			// pending state...
-			glog.V(2).Infof("[Agent Mode] Before Cleanup &qj=%p, qj=%+v", qj, qj)
 			glog.V(2).Infof("[Agent Mode] Deleting resources for XQJ %s because it will be preempted (newjob)\n", qj.Name)
 			err = cc.Cleanup(qj)
 			if err != nil {
@@ -1152,8 +1149,8 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 			}
 
 			// TODO(k82cn): replaced it with `UpdateStatus`
-//			cc.qjobResControls[ar.Type].SyncQueueJob(qj, &ar) could have updated Etcd
-			qj.Status.FilterIgnore = true  // true may not work // keep original behavior
+			// cc.qjobResControls[ar.Type].SyncQueueJob(qj, &ar) could have updated Etcd
+			qj.Status.FilterIgnore = true  // update State & QueueJobState after dispatch
 			if err := cc.updateEtcd(qj, "[manageQueueJob]after[ar.Type].SyncQueueJob", SendUpdate); err != nil {
 				return err
 			}
