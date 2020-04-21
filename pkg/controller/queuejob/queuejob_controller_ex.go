@@ -685,10 +685,10 @@ func (qjm *XController) ScheduleNext() {
 					qj.Spec.AggrResources.Items[i].AllocatedReplicas = ar.Replicas
 				}
 				qj.Status.CanRun = true
-				qj.Status.FilterIgnore = true   // update CanRun & Spec.  no need to trigger event
+				qj.Status.FilterIgnore = true // update CanRun & Spec.  no need to trigger event
 				qjm.updateEtcd(qj, "[ScheduleNext]setCanRun", SendUpdate)
 				// add to eventQueue for dispatching to Etcd
-				if err := qjm.eventQueue.Add(qj); err != nil {  // unsuccessful add to eventQueue, add back to activeQ
+				if err := qjm.eventQueue.Add(qj); err != nil { // unsuccessful add to eventQueue, add back to activeQ
 					glog.Errorf("[ScheduleNext] Fail to add %s to eventQueue, activeQ.Add_toSchedulingQueue &qj=%p Version=%s Status=%+v err=%#v", qj.Name, qj, qj.ResourceVersion, qj.Status, err)
 					qjm.qjqueue.MoveToActiveQueueIfExists(qj)
 				} else { // successful add to eventQueue, remove from qjqueue
@@ -699,17 +699,18 @@ func (qjm *XController) ScheduleNext() {
 						time.Sleep(time.Millisecond * 9900)
 					}
 				}
-			} else {  // Not enough free resources to dispatch HOL
-				glog.V(10).Infof("[ScheduleNext] HOL Blocking by %s before addUnsched for %s activeQ=%t Unsched=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
-				qjm.qjqueue.Delete(qj)  // Delete from activeQ in case other threads add it back
-				qjm.qjqueue.AddUnschedulableIfNotPresent(qj)
-				glog.V(10).Infof("[ScheduleNext] HOL Blocking by %s after  addUnsched for %s activeQ=%t Unsched=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
-				time.Sleep(time.Second * 1)  // Try to dispatch once per second
+			} else { // Not enough free resources to dispatch HOL
+				glog.V(4).Infof("[ScheduleNext] HOL Blocking by %s for %s activeQ=%t Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
+			}
+			// stop trying to dispatch after HeadOfLineHoldingTime
+			if (forwarded || time.Now().After(HOLStartTime.Add(time.Duration(qjm.serverOption.HeadOfLineHoldingTime)*time.Second))) {
+				break
+			} else { // Try to dispatch again after one second
+				time.Sleep(time.Second * 1)
 			}
 		}
-		if !forwarded {
-			// start thread to backoff
-			glog.V(10).Infof("[ScheduleNext] HOL backoff %s after waiting for %s activeQ=%t Unsched=%t", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj))
+		if !forwarded {	// start thread to backoff
+			glog.V(4).Infof("[ScheduleNext] HOL backoff %s after waiting for %s activeQ=%t Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(HOLStartTime), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 			go qjm.backoff(qj)
 		}
 	}
@@ -1095,8 +1096,8 @@ func (cc *XController) manageQueueJob(qj *arbv1.AppWrapper) error {
 				glog.V(10).Infof("[worker-manageQJ] leaving %s to qjqueue.UnschedulableQ activeQ=%t Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, cc.qjqueue.IfExistActiveQ(qj), cc.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 			} else {
 				glog.V(10).Infof("[worker-manageQJ] before add to activeQ %s activeQ=%t Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, cc.qjqueue.IfExistActiveQ(qj), cc.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
-				qj.Status.QueueJobState  = arbv1.QueueJobStateQueueing
-				qj.Status.FilterIgnore = true  // Update Queueing status, add to qjqueue for ScheduleNext
+				qj.Status.QueueJobState = arbv1.QueueJobStateQueueing
+				qj.Status.FilterIgnore = true // Update Queueing status, add to qjqueue for ScheduleNext
 				cc.updateEtcd(qj, "[manageQueueJob]setQueueing", SendUpdate)
 				if err = cc.qjqueue.AddIfNotPresent(qj); err != nil {
 					glog.Errorf("[worker-manageQJ] Fail to add %s to activeQueue. Back to eventQueue activeQ=%t Unsched=%t &qj=%p Version=%s Status=%+v err=%#v",
