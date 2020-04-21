@@ -657,7 +657,7 @@ func (qjm *XController) ScheduleNext() {
 		HOLStartTime := time.Now()
 		forwarded := false
 		// Try to forward to eventQueue for at most HeadOfLineHoldingTime
-		for (!forwarded && time.Now().Before(HOLStartTime.Add(time.Duration(qjm.serverOption.HeadOfLineHoldingTime)*time.Second))) {
+		for !forwarded {
 			priorityindex := qj.Status.SystemPriority
 			// Support for Non-Preemption
 			if !qjm.serverOption.Preemption     { priorityindex = -math.MaxFloat64 }
