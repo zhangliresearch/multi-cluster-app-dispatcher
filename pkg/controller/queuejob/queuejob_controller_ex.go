@@ -823,11 +823,12 @@ func (qjm *XController) UpdateQueueJobs() {
 				newjob.Name, time.Now().Sub(newjob.Status.ControllerFirstTimestamp.Time).Seconds(), newjob.CreationTimestamp, newjob.Status.ControllerFirstTimestamp)
 		}
 		glog.V(10).Infof("[UpdateQueueJobs] %s: qjqueue=%t &qj=%p Version=%s Status=%+v", newjob.Name, qjm.qjqueue.IfExist(newjob), newjob, newjob.ResourceVersion, newjob.Status)
-		if !qjm.qjqueue.IfExist(newjob) {
-			glog.V(4).Infof("[UpdateQueueJobs] enqueue %s &qj=%p Version=%s Status=%+v", newjob.Name, newjob, newjob.ResourceVersion, newjob.Status)
-			qjm.enqueue(newjob)
-		}
-  	}
+		if qjm.qjqueue.IfExist(newjob) { continue } // do not enqueue if already in qjqueue
+		_, exists, _ := qjm.eventQueue.Get(newjob)
+		if exists { continue } // do not enqueue if already in eventQueue
+		glog.V(4).Infof("[UpdateQueueJobs] enqueue %s &qj=%p Version=%s Status=%+v", newjob.Name, newjob, newjob.ResourceVersion, newjob.Status)
+		qjm.enqueue(newjob)
+	}
 }
 
 func (cc *XController) addQueueJob(obj interface{}) {
