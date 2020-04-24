@@ -668,7 +668,7 @@ func (qjm *XController) ScheduleNext() {
 
 			if aggqj.LessEqual(resources) {
 				// qj is ready to go!
-				apiQueueJob, e := qjm.queueJobLister.AppWrappers(qj.Namespace).Get(qj.Name)
+/*				apiQueueJob, e := qjm.queueJobLister.AppWrappers(qj.Namespace).Get(qj.Name)
 				// apiQueueJob's ControllerFirstTimestamp is only microsecond level instead of nanosecond level
 				if e != nil {
 					return
@@ -679,7 +679,7 @@ func (qjm *XController) ScheduleNext() {
 					glog.V(10).Infof("[ScheduleNext] %s found more recent copy from cache &apiQueueJob=%p apiQueueJob=%+v", apiQueueJob.Name, apiQueueJob, apiQueueJob)
 					apiQueueJob.DeepCopyInto(qj)
 				}
-				desired := int32(0)
+*/				desired := int32(0)
 				for i, ar := range qj.Spec.AggrResources.Items {
 					desired += ar.Replicas
 					qj.Spec.AggrResources.Items[i].AllocatedReplicas = ar.Replicas
