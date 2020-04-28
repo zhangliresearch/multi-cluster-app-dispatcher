@@ -687,6 +687,7 @@ func (qjm *XController) ScheduleNext() {
 				qj.Status.CanRun = true
 				qj.Status.FilterIgnore = true // update CanRun & Spec.  no need to trigger event
 				qjm.updateEtcd(qj, "[ScheduleNext]setCanRun", SendUpdate)
+				glog.V(4).Infof("[ScheduleNext] %s afterCanRunUpdate *Delay=%.6f seconds activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 				// add to eventQueue for dispatching to Etcd
 				if err := qjm.eventQueue.Add(qj); err != nil { // unsuccessful add to eventQueue, add back to activeQ
 					glog.Errorf("[ScheduleNext] Fail to add %s to eventQueue, activeQ.Add_toSchedulingQueue &qj=%p Version=%s Status=%+v err=%#v", qj.Name, qj, qj.ResourceVersion, qj.Status, err)
