@@ -692,9 +692,10 @@ func (qjm *XController) ScheduleNext() {
 					glog.Errorf("[ScheduleNext] Fail to add %s to eventQueue, activeQ.Add_toSchedulingQueue &qj=%p Version=%s Status=%+v err=%#v", qj.Name, qj, qj.ResourceVersion, qj.Status, err)
 					qjm.qjqueue.MoveToActiveQueueIfExists(qj)
 				} else { // successful add to eventQueue, remove from qjqueue
+					glog.V(4).Infof("[ScheduleNext] %s 2Delay=%.6f seconds eventQueue.Add_afterHeadOfLine activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 					qjm.qjqueue.Delete(qj)
 					forwarded = true
-					glog.V(4).Infof("[ScheduleNext] %s 2Delay=%.6f seconds eventQueue.Add_afterHeadOfLine activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
+					glog.V(4).Infof("[ScheduleNext] %s *Delay=%.6f seconds after_qjqueue.Delete activeQ=%t, Unsched=%t &qj=%p Version=%s Status=%+v", qj.Name, time.Now().Sub(qj.Status.ControllerFirstTimestamp.Time).Seconds(), qjm.qjqueue.IfExistActiveQ(qj), qjm.qjqueue.IfExistUnschedulableQ(qj), qj, qj.ResourceVersion, qj.Status)
 					if qjm.serverOption.Demo { // Delay 9.9 sec for Demo only
 						time.Sleep(time.Millisecond * 9900)
 					}
@@ -808,6 +809,7 @@ func (qjm *XController) UpdateAgent() {
 
 func (qjm *XController) UpdateQueueJobs() {
 	firstTime := metav1.NowMicro()
+	// retrive queueJobs from local cache.  no guarantee queueJobs contain up-to-date information
 	queueJobs, err := qjm.queueJobLister.AppWrappers("").List(labels.Everything())
 	if err != nil {
 		glog.Errorf("[UpdateQueueJobs] List of queueJobs err=%+v", err)
@@ -1018,10 +1020,11 @@ func (cc *XController) syncQueueJob(qj *arbv1.AppWrapper) error {
 		}
 		return err
 	}
+	// if qj is from UpdateQueueJobs() then it may not be up-to-date
 	// make sure qj has the latest information
 	if larger(queueJob.ResourceVersion, qj.ResourceVersion) {
-		glog.V(10).Infof("[ScheduleNext] %s found more recent copy from cache       &qj=%p       qj=%+v", qj.Name, qj, qj)
-		glog.V(10).Infof("[ScheduleNext] %s found more recent copy from cache &queueJob=%p queueJob=%+v", queueJob.Name, queueJob, queueJob)
+		glog.V(10).Infof("[worker-syncQJ] %s found more recent copy from cache       &qj=%p       qj=%+v", qj.Name, qj, qj)
+		glog.V(10).Infof("[worker-syncQJ] %s found more recent copy from cache &queueJob=%p queueJob=%+v", queueJob.Name, queueJob, queueJob)
 		queueJob.DeepCopyInto(qj)
 	}
 
