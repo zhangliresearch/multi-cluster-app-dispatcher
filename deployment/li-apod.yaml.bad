@@ -1,0 +1,33 @@
+apiVersion: arbitrator.incubator.k8s.io/v1alpha1
+kind: AppWrapper
+metadata:
+  name: nginx
+spec:
+  schedSpec:
+    minAvailable: 1
+  priority: 3
+  resources:
+    Items:
+    - replicas: 1
+      type: Pod
+      template:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: nginx
+          labels:
+            name: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx
+            ports:
+            - containerPort: 80
+            resources:
+              limits:
+                cpu: 125m
+                memory: 1024Mi
+              requests:
+                cpu: 125m
+                memory: 1024Mi
+

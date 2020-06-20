@@ -1,0 +1,52 @@
+I0418 01:00:52.479714       1 flags.go:52] FLAG: --agentconfigs=""
+I0418 01:00:52.479793       1 flags.go:52] FLAG: --alsologtostderr="false"
+I0418 01:00:52.479805       1 flags.go:52] FLAG: --backofftime="20"
+I0418 01:00:52.479815       1 flags.go:52] FLAG: --demo="false"
+I0418 01:00:52.479824       1 flags.go:52] FLAG: --dispatcher="false"
+I0418 01:00:52.479832       1 flags.go:52] FLAG: --dynamicpriority="false"
+I0418 01:00:52.479838       1 flags.go:52] FLAG: --headoflineholdingtime="25"
+I0418 01:00:52.479845       1 flags.go:52] FLAG: --kubeconfig=""
+I0418 01:00:52.479852       1 flags.go:52] FLAG: --log-backtrace-at=":0"
+I0418 01:00:52.479863       1 flags.go:52] FLAG: --log-dir=""
+I0418 01:00:52.479871       1 flags.go:52] FLAG: --log-flush-frequency="5s"
+I0418 01:00:52.479880       1 flags.go:52] FLAG: --logtostderr="true"
+I0418 01:00:52.479887       1 flags.go:52] FLAG: --master=""
+I0418 01:00:52.479894       1 flags.go:52] FLAG: --preemption="false"
+I0418 01:00:52.479900       1 flags.go:52] FLAG: --scheduler=""
+I0418 01:00:52.479907       1 flags.go:52] FLAG: --sendupdate="false"
+I0418 01:00:52.479913       1 flags.go:52] FLAG: --stderrthreshold="2"
+I0418 01:00:52.479921       1 flags.go:52] FLAG: --v="4"
+I0418 01:00:52.479927       1 flags.go:52] FLAG: --vmodule=""
+I0418 01:00:52.483817       1 builder.go:132] Entered Flags()
+I0418 01:00:52.483840       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.483853       1 builder.go:115] initFlagSet(): FlagSet was nil.
+I0418 01:00:52.483864       1 builder.go:120] initFlagSet(): Flagset secure-port = 0
+I0418 01:00:52.483881       1 builder.go:88] Entered InstallFlags()
+I0418 01:00:52.483888       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.483895       1 builder.go:120] initFlagSet(): Flagset secure-port = 0
+I0418 01:00:52.484059       1 adapter.go:68] 
+I0418 01:00:52.484072       1 builder.go:132] Entered Flags()
+I0418 01:00:52.484078       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484086       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484098       1 builder.go:124] initFlagSet(): Flagset secure-port = 443
+I0418 01:00:52.484111       1 builder.go:88] Entered InstallFlags()
+I0418 01:00:52.484117       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484124       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484131       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0418 01:00:52.484147       1 builder.go:132] Entered Flags()
+I0418 01:00:52.484153       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484160       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484172       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0418 01:00:52.484179       1 builder.go:88] Entered InstallFlags()
+I0418 01:00:52.484190       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484197       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484204       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0418 01:00:52.484211       1 builder.go:132] Entered Flags()
+I0418 01:00:52.484217       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484224       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484231       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0418 01:00:52.484238       1 builder.go:88] Entered InstallFlags()
+I0418 01:00:52.484244       1 builder.go:111] Entered initFlagSet()
+I0418 01:00:52.484250       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0418 01:00:52.484261       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0418 01:00:52.484276       1 adapter.go:49] Entered makeProviderOrDie()

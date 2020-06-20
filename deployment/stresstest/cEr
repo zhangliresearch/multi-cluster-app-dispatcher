@@ -1,0 +1,81 @@
+Name:               xqueuejob-controller-5759d8589b-6swnq
+Namespace:          kube-system
+Priority:           0
+PriorityClassName:  <none>
+Node:               test-for-diana-master/10.184.146.72
+Start Time:         Thu, 16 Apr 2020 16:24:53 +0000
+Labels:             app=custom-metrics-apiserver
+                    pod-template-hash=1315841456
+Annotations:        <none>
+Status:             Running
+IP:                 10.244.185.223
+Controlled By:      ReplicaSet/xqueuejob-controller-5759d8589b
+Containers:
+  kube-arbitrator:
+    Container ID:  docker://6ad9a7fac6920c0b15c5310497fc9bacfead48859ff8681fe37ffcdd3086e0ca
+    Image:         zhangliresearch/mcad-controller:v1.18
+    Image ID:      docker-pullable://zhangliresearch/mcad-controller@sha256:a48ad4b8988c9b74a0f4be5bec325ae1ff67859eef7baae6e29f60ba3fe2df20
+    Ports:         6443/TCP, 8080/TCP
+    Host Ports:    0/TCP, 0/TCP
+    Command:
+      mcad-controller
+    Args:
+      --v
+      4
+      --logtostderr
+      --sendupdate=false
+      --demo=false
+      --dynamicpriority=false
+      --preemption=false
+      --headoflineholdingtime=25
+      --backofftime=20
+    State:          Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Thu, 16 Apr 2020 16:26:51 +0000
+      Finished:     Thu, 16 Apr 2020 16:26:54 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Thu, 16 Apr 2020 16:26:17 +0000
+      Finished:     Thu, 16 Apr 2020 16:26:20 +0000
+    Ready:          False
+    Restart Count:  3
+    Limits:
+      cpu:     2
+      memory:  2Gi
+    Requests:
+      cpu:        2
+      memory:     2Gi
+    Environment:  <none>
+    Mounts:
+      /tmp from temp-vol (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from xqueuejob-controller-token-s5pj4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  temp-vol:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  xqueuejob-controller-token-s5pj4:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  xqueuejob-controller-token-s5pj4
+    Optional:    false
+QoS Class:       Guaranteed
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                From                            Message
+  ----     ------     ----               ----                            -------
+  Normal   Scheduled  2m3s               default-scheduler               Successfully assigned kube-system/xqueuejob-controller-5759d8589b-6swnq to test-for-diana-master
+  Normal   Pulling    7s (x4 over 2m1s)  kubelet, test-for-diana-master  pulling image "zhangliresearch/mcad-controller:v1.18"
+  Normal   Pulled     6s (x4 over 2m)    kubelet, test-for-diana-master  Successfully pulled image "zhangliresearch/mcad-controller:v1.18"
+  Normal   Created    6s (x4 over 2m)    kubelet, test-for-diana-master  Created container
+  Normal   Started    5s (x4 over 119s)  kubelet, test-for-diana-master  Started container
+  Warning  BackOff    1s (x4 over 55s)   kubelet, test-for-diana-master  Back-off restarting failed container

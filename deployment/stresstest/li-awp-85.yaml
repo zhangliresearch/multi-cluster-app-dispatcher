@@ -1,0 +1,41 @@
+apiVersion: arbitrator.incubator.k8s.io/v1alpha1
+kind: AppWrapper
+metadata:
+  name: helloli-awp-85-15
+spec:
+  schedSpec:
+    minAvailable: 1
+  priority: 1
+  priorityslope: 15
+  resources:
+    Items:
+    - replicas: 1
+      type: Pod
+      template:
+        metadata: 
+          name: helloli-awp-85-15
+          labels:
+            name: helloli-awp-85-15
+        template:
+          metadata:
+            name: helloli-awp-85-15
+            labels:
+              name: helloli-awp-85-15
+          spec:
+            containers:
+            - name: helloli-awp-85-15
+              image: alpine
+              imagePullPolicy: Never
+              command: ["sleep", "1"]
+              ports:
+              - containerPort: 80
+              resources:
+                limits:
+                  cpu: 125m
+                  memory: 256Mi
+                requests:
+                  cpu: 125m
+                  memory: 256Mi
+            restartPolicy: Never
+
+

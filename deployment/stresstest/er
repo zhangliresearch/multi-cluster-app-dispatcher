@@ -1,0 +1,53 @@
+I0416 17:35:27.363528       1 flags.go:52] FLAG: --agentconfigs=""
+I0416 17:35:27.363604       1 flags.go:52] FLAG: --alsologtostderr="false"
+I0416 17:35:27.363616       1 flags.go:52] FLAG: --backofftime="20"
+I0416 17:35:27.363625       1 flags.go:52] FLAG: --demo="false"
+I0416 17:35:27.363634       1 flags.go:52] FLAG: --dispatcher="false"
+I0416 17:35:27.363649       1 flags.go:52] FLAG: --dynamicpriority="false"
+I0416 17:35:27.363657       1 flags.go:52] FLAG: --headoflineholdingtime="25"
+I0416 17:35:27.363664       1 flags.go:52] FLAG: --kubeconfig=""
+I0416 17:35:27.363671       1 flags.go:52] FLAG: --log-backtrace-at=":0"
+I0416 17:35:27.363681       1 flags.go:52] FLAG: --log-dir=""
+I0416 17:35:27.363689       1 flags.go:52] FLAG: --log-flush-frequency="5s"
+I0416 17:35:27.363712       1 flags.go:52] FLAG: --logtostderr="true"
+I0416 17:35:27.363720       1 flags.go:52] FLAG: --master=""
+I0416 17:35:27.363727       1 flags.go:52] FLAG: --preemption="false"
+I0416 17:35:27.363735       1 flags.go:52] FLAG: --scheduler=""
+I0416 17:35:27.363741       1 flags.go:52] FLAG: --sendupdate="false"
+I0416 17:35:27.363748       1 flags.go:52] FLAG: --stderrthreshold="2"
+I0416 17:35:27.363756       1 flags.go:52] FLAG: --v="4"
+I0416 17:35:27.363763       1 flags.go:52] FLAG: --vmodule=""
+I0416 17:35:27.366354       1 builder.go:132] Entered Flags()
+I0416 17:35:27.366378       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366386       1 builder.go:115] initFlagSet(): FlagSet was nil.
+I0416 17:35:27.366396       1 builder.go:120] initFlagSet(): Flagset secure-port = 0
+I0416 17:35:27.366404       1 builder.go:88] Entered InstallFlags()
+I0416 17:35:27.366410       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366417       1 builder.go:120] initFlagSet(): Flagset secure-port = 0
+I0416 17:35:27.366543       1 adapter.go:68] 
+I0416 17:35:27.366561       1 builder.go:132] Entered Flags()
+I0416 17:35:27.366568       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366576       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366587       1 builder.go:124] initFlagSet(): Flagset secure-port = 443
+I0416 17:35:27.366594       1 builder.go:88] Entered InstallFlags()
+I0416 17:35:27.366600       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366607       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366617       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0416 17:35:27.366638       1 builder.go:132] Entered Flags()
+I0416 17:35:27.366644       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366651       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366658       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0416 17:35:27.366673       1 builder.go:88] Entered InstallFlags()
+I0416 17:35:27.366679       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366685       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366692       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0416 17:35:27.366698       1 builder.go:132] Entered Flags()
+I0416 17:35:27.366704       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366711       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366717       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0416 17:35:27.366724       1 builder.go:88] Entered InstallFlags()
+I0416 17:35:27.366730       1 builder.go:111] Entered initFlagSet()
+I0416 17:35:27.366736       1 builder.go:122] initFlagSet(): Error getting secure-port: <nil>
+I0416 17:35:27.366743       1 builder.go:124] initFlagSet(): Flagset secure-port = 6443
+I0416 17:35:27.366763       1 adapter.go:49] Entered makeProviderOrDie()
+F0416 17:35:30.366829       1 adapter.go:57] unable to construct discovery REST mapper: unable to construct dynamic discovery mapper: unable to populate initial set of REST mappings: Get https://10.96.0.1:443/api?timeout=32s: dial tcp 10.96.0.1:443: connect: no route to host
